@@ -1,5 +1,8 @@
 # Reseñas de Google – Autocentro
 
+## Enlace del dashboard
+[Abrir dashboard de reseñas](https://axisautomotivelab.github.io/resenas-google-autocentro/?key=cd0cb8eb15be4d34)
+
 Dashboard de reseñas de Google de Autocentro:
 Toyota, Nissan, Chrysler, AC+ San Juan y AC+ Guaynabo.
 
