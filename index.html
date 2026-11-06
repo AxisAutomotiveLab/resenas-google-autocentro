@@ -156,6 +156,8 @@
 <script>
 var API = 'https://script.google.com/macros/s/AKfycbw5jo9O1Xv4Lku4BAqLb2p07tO1lx1S8qPNR9HinS9RlN2LuszndkEWzg7GRo2SFkDd/exec';
 var KEY = new URLSearchParams(location.search).get('key') || '';
+// Página de una sola marca: <meta name="marca"> o ?marca=Toyota
+var MARCA_FIJA = new URLSearchParams(location.search).get('marca') || (document.querySelector('meta[name=marca]') || {}).content || '';
 // Fila: 0 marca, 1 fecha, 2 autor, 3 estrellas, 4 comentario, 5 respuesta, 6 fecha respuesta
 //       (cliente) 7 comentario original, 8 texto de búsqueda, 9 días para responder
 var D = null, marca = -1, lista = 'todas', pagina = 0, POR_PAG = 50, chart = null, vistaActual = [];
@@ -197,6 +199,17 @@ function cargar(){
       var tabs = '<button class="tab on" data-m="-1">Todas</button>';
       d.marcas.forEach(function(m,i){ tabs += '<button class="tab" data-m="'+i+'">'+esc(m)+'</button>'; });
       $('brandTabs').innerHTML = tabs;
+      if (MARCA_FIJA) {
+        var fi = d.marcas.findIndex(function(m){ return m.toLowerCase().indexOf(MARCA_FIJA.toLowerCase()) >= 0; });
+        if (fi >= 0) {
+          marca = fi;
+          $('brandTabs').classList.add('hide');
+          document.querySelector('header h1').textContent = 'Reseñas de Google · ' + d.marcas[fi];
+          document.title = 'Reseñas Google | ' + d.marcas[fi];
+          var nM = d.filas.filter(function(r){ return r[0] === fi; }).length;
+          $('upd').textContent = 'Actualizado: ' + d.actualizado + ' · ' + fmt(nM) + ' reseñas';
+        }
+      }
       $('loading').classList.add('hide'); $('app').classList.remove('hide');
       render();
     })

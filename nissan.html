@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta name="marca" content="Nissan">
+<base target="_top">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reseñas Google | Autocentro</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#F4F5F7; --card:#FFFFFF; --ink:#1B1F24; --muted:#6B7280; --line:#E5E7EB;
+    --accent:#B3122E; --accent-soft:#FBE9EC; --good:#1E7F4F; --good-soft:#E6F4EC;
+    --warn:#B45309; --warn-soft:#FEF3E2; --star:#E8A317;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,Arial,sans-serif;font-size:14px}
+  header{background:#1B1F24;color:#fff;padding:18px 24px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+  header h1{margin:0;font-size:18px;font-weight:600;letter-spacing:.2px}
+  header .sub{font-size:12px;color:#B8BEC7;margin-top:2px}
+  .wrap{max-width:1280px;margin:0 auto;padding:20px 24px 40px}
+  .tabs{display:flex;gap:6px;flex-wrap:wrap}
+  .tab{border:1px solid #3A414B;background:transparent;color:#E5E7EB;padding:7px 14px;border-radius:999px;cursor:pointer;font:inherit;font-size:13px}
+  .tab.on{background:#fff;color:#1B1F24;border-color:#fff;font-weight:600}
+  .filters{display:flex;flex-wrap:wrap;gap:10px;align-items:end;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:16px}
+  .f{display:flex;flex-direction:column;gap:4px}
+  .f label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+  select,input{font:inherit;font-size:13px;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
+  input[type=search]{min-width:220px}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:16px}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .kpi .l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+  .kpi .v{font-size:28px;font-weight:700;margin-top:6px}
+  .kpi .s{font-size:12px;color:var(--muted);margin-top:2px}
+  .kpi .d{font-size:12px;margin-top:6px;font-weight:600}
+  .d.up{color:var(--good)} .d.down{color:var(--accent)} .d.eq{color:var(--muted);font-weight:500}
+  .kpi.alert .v{color:var(--accent)}
+  .grid2{display:grid;grid-template-columns:1fr 2fr;gap:12px;margin-bottom:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+  .card h3{margin:0 0 12px;font-size:14px;font-weight:600}
+  .bars .row{display:grid;grid-template-columns:60px 1fr 70px;gap:10px;align-items:center;margin:9px 0;font-size:13px}
+  .bars .track{background:#F1F2F4;border-radius:6px;height:12px;overflow:hidden}
+  .bars .fill{height:100%;background:var(--star);border-radius:6px;transition:width .7s cubic-bezier(.2,.8,.2,1)}
+  .num{font-variant-numeric:tabular-nums}
+  @media (prefers-reduced-motion:reduce){.bars .fill{transition:none}}
+  .bars .n{text-align:right;color:var(--muted)}
+  .chartbox{position:relative;height:240px}
+  table{width:100%;border-collapse:collapse}
+  th{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);font-weight:600}
+  td{padding:10px;border-bottom:1px solid var(--line);vertical-align:top;font-size:13px}
+  td.c{color:#374151;max-width:520px}
+  .stars{color:var(--star);white-space:nowrap;letter-spacing:1px}
+  .pill{display:inline-block;padding:3px 9px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}
+  .pill.ok{background:var(--good-soft);color:var(--good)}
+  .pill.pen{background:var(--warn-soft);color:var(--warn)}
+  .pill.br{background:#EEF0F3;color:#374151;font-weight:500}
+  .when{display:block;font-size:11px;color:var(--muted);margin-top:4px;white-space:nowrap}
+  .when.late{color:var(--accent);font-weight:600}
+  .rbtn{display:inline-block;margin-top:6px;font-size:12px;color:#1F4E8C;cursor:pointer;user-select:none}
+  .reply{margin-top:6px;padding:8px 10px;border-left:3px solid var(--good);background:#F7FAF8;color:#374151;font-size:12px;border-radius:0 6px 6px 0}
+  .reply b{display:block;font-size:11px;color:var(--good);margin-bottom:3px}
+  .low td{background:#FFF8F8}
+  .listbar{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+  .listtabs{display:flex;gap:6px;flex-wrap:wrap}
+  .ltab,.btn{border:1px solid var(--line);background:#fff;padding:7px 14px;border-radius:8px;cursor:pointer;font:inherit;font-size:13px;color:var(--ink)}
+  .ltab.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .btn:hover{background:#F3F4F6}
+  .pager{display:flex;justify-content:space-between;align-items:center;margin-top:12px;font-size:13px;color:var(--muted)}
+  .pager button{font:inherit;font-size:13px;padding:6px 12px;border:1px solid var(--line);background:#fff;border-radius:8px;cursor:pointer}
+  .pager button:disabled{opacity:.4;cursor:default}
+  .cmp td,.cmp th{text-align:right}.cmp td:first-child,.cmp th:first-child{text-align:left}
+  #loading{padding:80px 20px;text-align:center;color:var(--muted)}
+  .hide{display:none}
+  .more{color:var(--accent);cursor:pointer;font-size:12px;margin-left:4px}
+  @media (max-width:860px){.grid2{grid-template-columns:1fr}.wrap{padding:16px}td.c{max-width:none}input[type=search]{min-width:0;width:100%}}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Reseñas de Google · Autocentro</h1>
+    <div class="sub" id="upd">Cargando…</div>
+  </div>
+  <div class="tabs" id="brandTabs"></div>
+</header>
+
+<div class="wrap">
+  <div id="loading">Cargando reseñas…</div>
+  <div id="app" class="hide">
+    <div class="filters">
+      <div class="f"><label>Periodo</label>
+        <select id="periodo">
+          <option value="30" selected>Últimos 30 días</option>
+          <option value="90">Últimos 90 días</option>
+          <option value="mes">Este mes</option>
+          <option value="mesant">Mes pasado</option>
+          <option value="anio">Este año</option>
+          <option value="365">Últimos 12 meses</option>
+          <option value="todo">Todo el historial</option>
+          <option value="custom">Personalizado…</option>
+        </select>
+      </div>
+      <div class="f hide" id="customBox" style="flex-direction:row;gap:8px">
+        <div class="f"><label>Desde</label><input type="date" id="desde"></div>
+        <div class="f"><label>Hasta</label><input type="date" id="hasta"></div>
+      </div>
+      <div class="f"><label>Estrellas</label>
+        <select id="estrellas">
+          <option value="">Todas</option><option value="5">5 ★</option><option value="4">4 ★</option>
+          <option value="3">3 ★</option><option value="2">2 ★</option><option value="1">1 ★</option>
+          <option value="neg">1–2 ★ (negativas)</option>
+        </select>
+      </div>
+      <div class="f"><label>Estado</label>
+        <select id="estado">
+          <option value="">Todas</option><option value="pen">Pendientes</option><option value="ok">Respondidas</option>
+        </select>
+      </div>
+      <div class="f" style="flex:1"><label>Buscar cliente o texto</label>
+        <input type="search" id="q" placeholder="Ej. nombre del cliente o del empleado">
+      </div>
+    </div>
+
+    <div class="kpis" id="kpis"></div>
+
+    <div class="card hide" id="cmpCard" style="margin-bottom:16px">
+      <h3>Comparación por marca</h3>
+      <table class="cmp" id="cmpTable"></table>
+    </div>
+
+    <div class="grid2">
+      <div class="card"><h3>Distribución de calificaciones</h3><div class="bars" id="dist"></div></div>
+      <div class="card"><h3 id="trendTitle">Tendencia</h3><div class="chartbox"><canvas id="trend"></canvas></div></div>
+    </div>
+
+    <div class="card">
+      <div class="listbar">
+        <div class="listtabs">
+          <button class="ltab on" data-v="todas">Reseñas</button>
+          <button class="ltab" data-v="pend">Pendientes de respuesta <span id="pendCount"></span></button>
+        </div>
+        <button class="btn" id="csv">⬇ Exportar a Excel (CSV)</button>
+      </div>
+      <table>
+        <thead><tr><th>Fecha</th><th>Marca</th><th>Cliente</th><th>Calificación</th><th>Comentario</th><th>Estado</th></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+      <div class="pager">
+        <span id="pinfo"></span>
+        <span><button id="prev">← Anterior</button> <button id="next">Siguiente →</button></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var API = 'https://script.google.com/macros/s/AKfycbw5jo9O1Xv4Lku4BAqLb2p07tO1lx1S8qPNR9HinS9RlN2LuszndkEWzg7GRo2SFkDd/exec';
+var KEY = new URLSearchParams(location.search).get('key') || '';
+// Página de una sola marca: <meta name="marca"> o ?marca=Toyota
+var MARCA_FIJA = new URLSearchParams(location.search).get('marca') || (document.querySelector('meta[name=marca]') || {}).content || '';
+// Fila: 0 marca, 1 fecha, 2 autor, 3 estrellas, 4 comentario, 5 respuesta, 6 fecha respuesta
+//       (cliente) 7 comentario original, 8 texto de búsqueda, 9 días para responder
+var D = null, marca = -1, lista = 'todas', pagina = 0, POR_PAG = 50, chart = null, vistaActual = [];
+var HOY = iso(new Date()), DIAS_ALERTA = 2;
+
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function fmt(n){ return n.toLocaleString('es-PR'); }
+function pct(a,b){ return b ? (100*a/b).toFixed(1)+'%' : '—'; }
+function iso(d){ return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2); }
+function dmy(s){ return s ? s.slice(5,7)+'/'+s.slice(8,10)+'/'+s.slice(0,4) : ''; } // mm/dd/yyyy
+function addDays(s, n){ var d = new Date(s + 'T12:00:00'); d.setDate(d.getDate() + n); return iso(d); }
+function diff(a, b){ return Math.round((new Date(b + 'T12:00:00') - new Date(a + 'T12:00:00')) / 864e5); }
+function stars(n){ return '★★★★★'.slice(0,n) + '<span style="color:#D1D5DB">' + '★★★★★'.slice(0,5-n) + '</span>'; }
+function dias(n){ return n === 0 ? 'el mismo día' : n === 1 ? '1 día' : fmt(n) + ' días'; }
+// Muestra el texto original cuando Google añade una traducción
+function original(c){
+  if (!c) return '';
+  var i = c.indexOf('(Original)');
+  if (i >= 0) return c.slice(i + 10).trim();
+  var j = c.indexOf('(Translated by Google)');
+  if (j > 0) return c.slice(0, j).trim();
+  return c.trim();
+}
+
+function cargar(){
+  if (!KEY) { $('loading').textContent = 'Acceso no autorizado. Usa el enlace completo del dashboard.'; return; }
+  fetch(API + '?page=api&key=' + encodeURIComponent(KEY))
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if (d.error) throw new Error(d.error);
+      D = d;
+      D.filas.forEach(function(r){
+        r[7] = original(r[4]);
+        r[8] = (r[2] + ' ' + r[4]).toLowerCase();
+        r[9] = (r[5] && r[6]) ? Math.max(0, diff(r[1], r[6])) : null;
+      });
+      $('upd').textContent = 'Actualizado: ' + d.actualizado + ' · ' + fmt(d.filas.length) + ' reseñas';
+      var tabs = '<button class="tab on" data-m="-1">Todas</button>';
+      d.marcas.forEach(function(m,i){ tabs += '<button class="tab" data-m="'+i+'">'+esc(m)+'</button>'; });
+      $('brandTabs').innerHTML = tabs;
+      if (MARCA_FIJA) {
+        var fi = d.marcas.findIndex(function(m){ return m.toLowerCase().indexOf(MARCA_FIJA.toLowerCase()) >= 0; });
+        if (fi >= 0) {
+          marca = fi;
+          $('brandTabs').classList.add('hide');
+          document.querySelector('header h1').textContent = 'Reseñas de Google · ' + d.marcas[fi];
+          document.title = 'Reseñas Google | ' + d.marcas[fi];
+          var nM = d.filas.filter(function(r){ return r[0] === fi; }).length;
+          $('upd').textContent = 'Actualizado: ' + d.actualizado + ' · ' + fmt(nM) + ' reseñas';
+        }
+      }
+      $('loading').classList.add('hide'); $('app').classList.remove('hide');
+      render();
+    })
+    .catch(function(e){ $('loading').textContent = 'Error al cargar: ' + e.message; });
+}
+cargar();
+
+/* ---------- Periodos ---------- */
+function rango(){
+  var p = $('periodo').value, hoy = new Date(), d = null, h = HOY;
+  if (p === '30' || p === '90' || p === '365') d = addDays(HOY, -(+p) + 1);
+  else if (p === 'mes') d = iso(new Date(hoy.getFullYear(), hoy.getMonth(), 1));
+  else if (p === 'mesant') { d = iso(new Date(hoy.getFullYear(), hoy.getMonth()-1, 1)); h = iso(new Date(hoy.getFullYear(), hoy.getMonth(), 0)); }
+  else if (p === 'anio') d = hoy.getFullYear() + '-01-01';
+  else if (p === 'custom') { d = $('desde').value || null; h = $('hasta').value || h; }
+  return { d: d, h: h };
+}
+// Periodo anterior para comparar (null si es "todo el historial")
+function rangoAnterior(r){
+  var p = $('periodo').value;
+  if (!r.d) return null;
+  if (p === 'mesant' || p === 'mes') {
+    var ini = new Date(r.d + 'T12:00:00'); ini.setMonth(ini.getMonth() - 1);
+    var fin = p === 'mesant' ? new Date(ini.getFullYear(), ini.getMonth() + 1, 0) : new Date(r.h + 'T12:00:00');
+    if (p === 'mes') fin.setMonth(fin.getMonth() - 1);
+    return { d: iso(ini), h: iso(fin), txt: 'vs. mes anterior' };
+  }
+  if (p === 'anio') return { d: (+r.d.slice(0,4) - 1) + '-01-01', h: (+r.h.slice(0,4) - 1) + r.h.slice(4), txt: 'vs. mismo periodo del año pasado' };
+  var len = diff(r.d, r.h) + 1;
+  return { d: addDays(r.d, -len), h: addDays(r.d, -1), txt: 'vs. ' + fmt(len) + ' días anteriores' };
+}
+
+function filtrar(r, conEstado){
+  var e = $('estrellas').value, s = $('estado').value, q = $('q').value.trim().toLowerCase();
+  return D.filas.filter(function(x){
+    if (marca >= 0 && x[0] !== marca) return false;
+    if (r.d && x[1] < r.d) return false;
+    if (r.h && x[1] > r.h) return false;
+    if (e === 'neg') { if (x[3] > 2) return false; } else if (e && x[3] !== +e) return false;
+    if (conEstado && s === 'pen' && x[5]) return false;
+    if (conEstado && s === 'ok' && !x[5]) return false;
+    if (q && x[8].indexOf(q) < 0) return false;
+    return true;
+  });
+}
+
+function resumen(rows){
+  var n = rows.length, sum = 0, pos = 0, resp = 0, td = 0, tn = 0, rapido = 0;
+  rows.forEach(function(x){
+    sum += x[3]; if (x[3] >= 4) pos++;
+    if (x[5]) resp++;
+    if (x[9] !== null) { td += x[9]; tn++; if (x[9] <= DIAS_ALERTA) rapido++; }
+  });
+  return { n:n, avg: n ? sum/n : null, pos: n ? 100*pos/n : null, posN: pos, resp: n ? 100*resp/n : null, respN: resp,
+           pen: n - resp, tiempo: tn ? td/tn : null, rapido: tn ? 100*rapido/tn : null };
+}
+
+// Flecha de cambio. mejorSiSube=false cuando bajar es bueno (tiempo de respuesta, pendientes)
+function delta(act, ant, dec, suf, mejorSiSube, txt){
+  if (act === null || ant === null || ant === undefined) return '<div class="d eq">Sin datos para comparar</div>';
+  var d = act - ant, f = Math.pow(10, dec);
+  d = Math.round(d * f) / f;
+  if (d === 0) return '<div class="d eq">= igual ' + txt + '</div>';
+  var bueno = mejorSiSube ? d > 0 : d < 0;
+  return '<div class="d ' + (bueno ? 'up' : 'down') + '">' + (d > 0 ? '▲ ' : '▼ ') + Math.abs(d).toFixed(dec) + suf + ' ' + txt + '</div>';
+}
+
+function render(){
+  var r = rango(), base = filtrar(r, false), rows = filtrar(r, true), k = resumen(base);
+  var ra = rangoAnterior(r), a = ra ? resumen(filtrar(ra, false)) : null;
+  var cmp = function(act, ant, dec, suf, up){ return a ? delta(act, ant, dec, suf, up, ra.txt) : ''; };
+  var neg = base.filter(function(x){ return x[3] <= 2 && !x[5]; }).length;
+
+  $('kpis').innerHTML =
+    kpi('Total reseñas', num(k.n, 0, ''), 'en el periodo', cmp(k.n, a && a.n, 0, '', true)) +
+    kpi('Calificación promedio', num(k.avg, 2, ''), '★ escala 1 a 5', cmp(k.avg, a && a.avg, 2, '', true)) +
+    kpi('Positivas (4–5 ★)', num(k.pos, 1, '%'), fmt(k.posN) + ' reseñas', cmp(k.pos, a && a.pos, 1, ' pts', true)) +
+    kpi('Tasa de respuesta', num(k.resp, 1, '%'), fmt(k.respN) + ' respondidas', cmp(k.resp, a && a.resp, 1, ' pts', true)) +
+    kpi('Tiempo de respuesta', num(k.tiempo, 1, ' d'),
+        k.rapido !== null ? k.rapido.toFixed(0) + '% contestadas en ' + DIAS_ALERTA + ' días o menos' : 'promedio en días', cmp(k.tiempo, a && a.tiempo, 1, ' d', false)) +
+    kpi('Pendientes', num(k.pen, 0, ''), fmt(neg) + ' negativas sin responder', cmp(k.pen, a && a.pen, 0, '', false), k.pen > 0);
+  animarNumeros();
+
+  // Comparación por marca (solo en "Todas")
+  if (marca < 0) {
+    var h = '<tr><th>Marca</th><th>Reseñas</th><th>Promedio</th><th>Positivas</th><th>Respuesta</th><th>Tiempo resp.</th><th>Pendientes</th></tr>';
+    D.marcas.forEach(function(m,i){
+      var s = resumen(base.filter(function(x){ return x[0] === i; }));
+      h += '<tr><td><b>'+esc(m)+'</b></td><td>'+fmt(s.n)+'</td><td>'+(s.avg!==null?s.avg.toFixed(2):'—')+'</td><td>'+(s.pos!==null?s.pos.toFixed(1)+'%':'—')+
+        '</td><td>'+(s.resp!==null?s.resp.toFixed(1)+'%':'—')+'</td><td>'+(s.tiempo!==null?s.tiempo.toFixed(1)+' d':'—')+'</td><td>'+fmt(s.pen)+'</td></tr>';
+    });
+    $('cmpTable').innerHTML = h; $('cmpCard').classList.remove('hide');
+  } else $('cmpCard').classList.add('hide');
+
+  // Distribución
+  var c = [0,0,0,0,0,0]; base.forEach(function(x){ c[x[3]]++; });
+  var dh = '';
+  for (var s = 5; s >= 1; s--) {
+    var p = k.n ? 100*c[s]/k.n : 0;
+    dh += '<div class="row"><span class="stars">'+s+' ★</span><div class="track"><div class="fill" data-w="'+p.toFixed(1)+'" style="width:'+(PREV_BAR[s] || 0)+'%"></div></div><span class="n">'+fmt(c[s])+' · '+p.toFixed(0)+'%</span></div>';
+  }
+  $('dist').innerHTML = dh;
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){
+    $('dist').querySelectorAll('.fill').forEach(function(el, i){ el.style.width = el.dataset.w + '%'; PREV_BAR[5 - i] = el.dataset.w; });
+  }); });
+
+  tendencia(base);
+
+  // Lista
+  var lst = rows.slice();
+  var pend = rows.filter(function(x){ return !x[5]; });
+  $('pendCount').textContent = '(' + fmt(pend.length) + ')';
+  if (lista === 'pend') { lst = pend; lst.sort(function(a,b){ return a[3]-b[3] || (a[1] < b[1] ? 1 : -1); }); }
+  else lst.sort(function(a,b){ return a[1] < b[1] ? 1 : a[1] > b[1] ? -1 : 0; });
+  vistaActual = lst;
+  var tot = lst.length, pages = Math.max(1, Math.ceil(tot/POR_PAG));
+  if (pagina >= pages) pagina = pages - 1;
+  var vis = lst.slice(pagina*POR_PAG, (pagina+1)*POR_PAG), tb = '';
+  vis.forEach(function(x, i){
+    var txt = x[7], corto = txt.length > 260 ? txt.slice(0,260) + '…' : txt;
+    var estado;
+    if (x[5]) estado = '<span class="pill ok">Respondida</span>' + (x[9] !== null ? '<span class="when' + (x[9] > DIAS_ALERTA ? ' late' : '') + '">en ' + dias(x[9]) + '</span>' : '');
+    else { var e = diff(x[1], HOY); estado = '<span class="pill pen">Pendiente</span><span class="when' + (e > DIAS_ALERTA ? ' late' : '') + '">' + (e === 0 ? 'de hoy' : 'hace ' + dias(e)) + '</span>'; }
+    tb += '<tr class="'+(x[3] <= 2 && !x[5] ? 'low' : '')+'">' +
+      '<td style="white-space:nowrap">'+dmy(x[1])+'</td>' +
+      '<td><span class="pill br">'+esc(D.marcas[x[0]])+'</span></td>' +
+      '<td><b>'+esc(x[2])+'</b></td>' +
+      '<td class="stars">'+stars(x[3])+'</td>' +
+      '<td class="c">'+(txt ? '<span>'+esc(corto)+'</span>'+(txt.length>260?'<span class="more" data-i="'+i+'">ver más</span>':'') : '<span style="color:#9CA3AF">Sin comentario</span>') +
+        (x[5] ? '<div><span class="rbtn" data-r="'+i+'">▸ Ver respuesta</span><div class="reply hide" id="rp'+i+'"><b>Respuesta de Autocentro'+(x[6]?' · '+dmy(x[6]):'')+'</b>'+esc(x[5])+'</div></div>' : '') + '</td>' +
+      '<td>'+estado+'</td></tr>';
+  });
+  $('tbody').innerHTML = tb || '<tr><td colspan="6" style="text-align:center;color:#9CA3AF;padding:30px">No hay reseñas con estos filtros.</td></tr>';
+  $('tbody').querySelectorAll('.more').forEach(function(el){
+    el.onclick = function(){ el.previousSibling.textContent = vis[+el.dataset.i][7]; el.remove(); };
+  });
+  $('tbody').querySelectorAll('.rbtn').forEach(function(el){
+    el.onclick = function(){
+      var box = $('rp' + el.dataset.r), abierto = box.classList.toggle('hide') === false;
+      el.textContent = abierto ? '▾ Ocultar respuesta' : '▸ Ver respuesta';
+    };
+  });
+  $('pinfo').textContent = tot ? ('Mostrando ' + fmt(pagina*POR_PAG+1) + '–' + fmt(Math.min(tot,(pagina+1)*POR_PAG)) + ' de ' + fmt(tot)) : '';
+  $('prev').disabled = pagina === 0; $('next').disabled = pagina >= pages-1;
+}
+
+var PREV_NUM = [], PREV_BAR = {};
+var SIN_MOV = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function txtNum(v, dec, suf){ return (dec ? v.toFixed(dec) : fmt(Math.round(v))) + suf; }
+// Número animado: se dibuja con el valor anterior y sube/baja hasta el nuevo
+function num(v, dec, suf){
+  if (v === null || v === undefined || isNaN(v)) return '<span class="num" data-na="1">—</span>';
+  return '<span class="num" data-v="' + v + '" data-dec="' + dec + '" data-suf="' + esc(suf) + '"></span>';
+}
+function animarNumeros(){
+  var els = $('kpis').querySelectorAll('.num'), t0 = null, DUR = SIN_MOV ? 0 : 700;
+  var items = [];
+  els.forEach(function(el, i){
+    if (el.dataset.na) { PREV_NUM[i] = null; return; }
+    var to = +el.dataset.v, from = (PREV_NUM[i] === null || PREV_NUM[i] === undefined) ? 0 : PREV_NUM[i];
+    items.push({ el: el, from: from, to: to, dec: +el.dataset.dec, suf: el.dataset.suf });
+    el.textContent = txtNum(DUR ? from : to, +el.dataset.dec, el.dataset.suf);
+    PREV_NUM[i] = to;
+  });
+  if (!DUR) return;
+  function paso(ts){
+    if (!t0) t0 = ts;
+    var p = Math.min(1, (ts - t0) / DUR), e = 1 - Math.pow(1 - p, 3);
+    items.forEach(function(it){ it.el.textContent = txtNum(it.from + (it.to - it.from) * e, it.dec, it.suf); });
+    if (p < 1) requestAnimationFrame(paso);
+  }
+  requestAnimationFrame(paso);
+}
+function kpi(l,v,s,d,alert){ return '<div class="kpi'+(alert?' alert':'')+'"><div class="l">'+l+'</div><div class="v">'+v+'</div><div class="s">'+s+'</div>'+(d||'')+'</div>'; }
+
+function tendencia(rows){
+  if (!rows.length) { if (chart) chart.destroy(); chart = null; $('trendTitle').textContent = 'Tendencia'; return; }
+  var min = rows.reduce(function(a,x){ return x[1] < a ? x[1] : a; }, '9999');
+  var max = rows.reduce(function(a,x){ return x[1] > a ? x[1] : a; }, '0000');
+  var meses = (+max.slice(0,4) - +min.slice(0,4))*12 + (+max.slice(5,7) - +min.slice(5,7));
+  var modo = diff(min, max) <= 92 ? 'semana' : (meses > 24 ? 'anio' : 'mes');
+  var lunes = function(f){ var d = new Date(f + 'T12:00:00'); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return iso(d); };
+  var keyOf = modo === 'semana' ? lunes : modo === 'anio' ? function(f){ return f.slice(0,4); } : function(f){ return f.slice(0,7); };
+  var g = {};
+  rows.forEach(function(x){ var k = keyOf(x[1]); if (!g[k]) g[k] = {n:0,s:0}; g[k].n++; g[k].s += x[3]; });
+  var labels = [];
+  if (modo === 'semana') { for (var w = lunes(min); w <= max; w = addDays(w, 7)) labels.push(w); }
+  else if (modo === 'anio') { for (var y = +min.slice(0,4); y <= +max.slice(0,4); y++) labels.push(String(y)); }
+  else { var y0 = +min.slice(0,4), m0 = +min.slice(5,7); for (var i = 0; i <= meses; i++) { var mm = (m0-1+i)%12+1, yy = y0 + Math.floor((m0-1+i)/12); labels.push(yy+'-'+('0'+mm).slice(-2)); } }
+  $('trendTitle').textContent = 'Tendencia ' + (modo === 'semana' ? 'por semana' : modo === 'anio' ? 'por año' : 'por mes') + ': volumen y promedio';
+  var shown = labels.map(function(l){ return modo === 'semana' ? 'Sem. ' + l.slice(5,7) + '/' + l.slice(8,10) : l.length > 4 ? l.slice(5,7)+'/'+l.slice(0,4) : l; });
+  var vol = labels.map(function(l){ return g[l] ? g[l].n : 0; });
+  var avg = labels.map(function(l){ return g[l] ? +(g[l].s/g[l].n).toFixed(2) : null; });
+  if (chart) {
+    chart.data.labels = shown;
+    chart.data.datasets[0].data = vol;
+    chart.data.datasets[1].data = avg;
+    chart.update();
+    return;
+  }
+  chart = new Chart($('trend'), {
+    data: { labels: shown, datasets: [
+      { type:'bar', label:'Reseñas', data: vol, backgroundColor:'#CBD2DC', borderRadius:4, yAxisID:'y', order:2 },
+      { type:'line', label:'Promedio ★', data: avg, borderColor:'#B3122E', backgroundColor:'#B3122E', tension:.3, pointRadius:5, pointHoverRadius:7, borderWidth:2, spanGaps:true, yAxisID:'y1', order:1, clip:false }
+    ]},
+    options: { maintainAspectRatio:false, layout:{ padding:{ top:12 } }, interaction:{mode:'index',intersect:false},
+      plugins:{ legend:{ position:'bottom', labels:{ boxWidth:12, font:{size:12} } } },
+      scales:{ y:{ beginAtZero:true, grace:'25%', grid:{color:'#F1F2F4'}, ticks:{precision:0}, title:{ display:true, text:'Reseñas', color:'#6B7280', font:{size:11} } },
+               y1:{ position:'right', min:1, max:5, grid:{display:false}, ticks:{ stepSize:1 }, title:{ display:true, text:'Promedio ★', color:'#B3122E', font:{size:11} } },
+               x:{ grid:{display:false} } } }
+  });
+}
+
+/* ---------- Exportar CSV (lo que se ve con los filtros) ---------- */
+function exportar(){
+  var q = function(v){ v = v === null || v === undefined ? '' : String(v); return '"' + v.replace(/"/g, '""').replace(/\r?\n/g, ' ') + '"'; };
+  var out = ['Fecha,Marca,Cliente,Estrellas,Comentario,Respuesta,Fecha respuesta,Días para responder,Estado'];
+  vistaActual.forEach(function(x){
+    out.push([dmy(x[1]), D.marcas[x[0]], x[2], x[3], x[7], x[5], dmy(x[6]), x[9] === null ? '' : x[9], x[5] ? 'Respondida' : 'Pendiente'].map(q).join(','));
+  });
+  var nombre = 'resenas_' + (marca < 0 ? 'todas' : D.marcas[marca].toLowerCase().replace(/[^a-z0-9]+/g, '-')) + (lista === 'pend' ? '_pendientes' : '') + '_' + HOY + '.csv';
+  var blob = new Blob(['﻿' + out.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = nombre;
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+}
+
+document.addEventListener('click', function(ev){
+  var t = ev.target.closest('.tab');
+  if (t) { document.querySelectorAll('.tab').forEach(function(b){ b.classList.remove('on'); }); t.classList.add('on'); marca = +t.dataset.m; pagina = 0; render(); return; }
+  var l = ev.target.closest('.ltab');
+  if (l) { document.querySelectorAll('.ltab').forEach(function(b){ b.classList.remove('on'); }); l.classList.add('on'); lista = l.dataset.v; pagina = 0; render(); }
+});
+['periodo','estrellas','estado','desde','hasta'].forEach(function(id){
+  $(id).addEventListener('change', function(){
+    $('customBox').classList.toggle('hide', $('periodo').value !== 'custom');
+    pagina = 0; render();
+  });
+});
+var tq = null;
+$('q').addEventListener('input', function(){ clearTimeout(tq); tq = setTimeout(function(){ pagina = 0; render(); }, 250); });
+$('csv').onclick = exportar;
+$('prev').onclick = function(){ pagina--; render(); window.scrollTo({top: $('tbody').offsetTop - 200}); };
+$('next').onclick = function(){ pagina++; render(); window.scrollTo({top: $('tbody').offsetTop - 200}); };
+</script>
+</body>
+</html>
